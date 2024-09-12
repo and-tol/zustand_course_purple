@@ -1,25 +1,72 @@
 import { create, StateCreator } from 'zustand';
-import { CoffeeType, getCoffeeListReqParams } from '../types/coffeetypes';
-import { devtools } from 'zustand/middleware';
+import {
+	CoffeeType,
+	getCoffeeListReqParams,
+	OrderCoffeeRes,
+	OrderItem,
+} from '../types/coffeetypes';
+import { devtools, persist } from 'zustand/middleware';
 import axios from 'axios';
 
 const BASE_URL = 'https:/purpleschool.ru/coffee-api';
 
+// BASE_URL + "order"
+
 type CoffeeState = {
 	coffeeList?: CoffeeType[];
 	controller?: AbortController;
+	cart?: OrderItem[];
+	address?: string;
 };
 
 type CoffeeActions = {
 	getCoffeeList: (params?: getCoffeeListReqParams) => void;
+	addToCart: (item: CoffeeType) => void;
+	clearCart: () => void;
+	orderCoffee: () => void;
+	setAddress: (address: string) => void;
 };
 
-const coffeeSlice: StateCreator<CoffeeActions & CoffeeState, [['zustand/devtools', never]]> = (
-	set,
-	get
-) => ({
+const coffeeSlice: StateCreator<
+	CoffeeActions & CoffeeState,
+	[['zustand/devtools', never], ['zustand/persist', unknown]]
+> = (set, get) => ({
 	coffeeList: undefined,
 	controller: undefined,
+	cart: undefined,
+	address: undefined,
+	clearCart: () => {
+		set({ cart: undefined });
+	},
+	setAddress: (address) => {
+		set({ address });
+	},
+	addToCart: (item) => {
+		const { cart } = get();
+		const { id, name, subTitle } = item;
+		const preparedItem: OrderItem = {
+			id,
+			name: `${name} ${subTitle}`,
+			size: 'L',
+			quantity: 1,
+		};
+		set({ cart: cart ? [...cart, preparedItem] : [preparedItem] });
+	},
+	orderCoffee: async () => {
+		const { cart, address, clearCart } = get();
+		try {
+			const { data } = await axios.post<OrderCoffeeRes>(URL + 'order', {
+				address,
+				orderItems: cart,
+			});
+			if (data.success) {
+				alert(data.message);
+				clearCart();
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	},
 	getCoffeeList: async (params) => {
 		const { controller } = get();
 		if (controller) {
@@ -38,4 +85,20 @@ const coffeeSlice: StateCreator<CoffeeActions & CoffeeState, [['zustand/devtools
 	},
 });
 
-export const useCoffeeStore = create<CoffeeActions & CoffeeState>()(devtools(coffeeSlice));
+export const useCoffeeStore = create<CoffeeActions & CoffeeState>()(
+	devtools(
+		persist(coffeeSlice, {
+			name: 'coffeeStore',
+			partialize: (state) => ({
+				cart: state.cart,
+				address: state.address,
+			}),
+		}),
+		{
+			name: 'coffeeStore',
+		}
+	)
+);
+
+export const getCoffeeList = (params?: getCoffeeListReqParams) =>
+	useCoffeeStore.getState().getCoffeeList(params);
