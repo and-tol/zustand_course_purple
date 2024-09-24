@@ -2,6 +2,7 @@
 import { create /*StateCreator*/ } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import {
+	CoffeeType,
 	// CoffeeType,
 	getCoffeeListReqParams,
 	// OrderCoffeeRes,
@@ -128,3 +129,14 @@ export const useCoffeeStore = create<CartActions & CartState & ListActions & Lis
 
 export const getCoffeeList = (params?: getCoffeeListReqParams) =>
 	useCoffeeStore.getState().getCoffeeList(params);
+
+export const setParams = (params?: getCoffeeListReqParams) =>
+	useCoffeeStore.getState().setParams(params);
+
+export const setAddress = (address: string) => useCoffeeStore.getState().setAddress(address);
+
+export const orderCoffee = () => useCoffeeStore.getState().orderCoffee();
+
+export const clearCart = () => useCoffeeStore.getState().clearCart();
+
+export const addToCart = (item: CoffeeType) => useCoffeeStore.getState().addToCart(item);
