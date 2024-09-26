@@ -1,13 +1,13 @@
-import { StateCreator } from 'zustand';
-import { CartActions, CartState, ListActions, ListState } from '../types/store.type';
 import axios from 'axios';
-import {BASE_URL} from '../api/coreApi';
+import { StateCreator } from 'zustand';
+import { BASE_URL } from '../api/coreApi';
+import { CartActions, CoffeeCartState, CoffeeListActions, ListState } from '../types/store.type';
 
 export const listSlice: StateCreator<
-	CartActions & CartState & ListActions & ListState,
+	CartActions & CoffeeCartState & CoffeeListActions & ListState,
 	[['zustand/devtools', never], ['zustand/persist', unknown]],
 	[['zustand/devtools', never], ['zustand/persist', unknown]],
-	ListActions & ListState
+	CoffeeListActions & ListState
 > = (set, get) => ({
 	controller: undefined,
 	address: undefined,
@@ -27,12 +27,8 @@ export const listSlice: StateCreator<
 		const newController = new AbortController();
 		set({ controller: newController });
 		const { signal } = newController;
-		try {
-			const { data } = await axios.get(BASE_URL, { params, signal });
-			set({ coffeeList: data });
-		} catch (error) {
-			if (axios.isCancel(error)) return;
-			console.error(error);
-		}
+
+		const { data } = await axios.get(BASE_URL, { params, signal });
+		return data;
 	},
 });

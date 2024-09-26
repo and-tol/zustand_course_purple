@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import {useEffect} from 'react';
+import {useSearchParams} from 'react-router-dom';
 
-export const useURLStorage = <T extends Record<string, string>>(
+export const useURLParamsStore = <T extends Record<string, string>>(
 	params: T,
 	setParams: (params: T) => void
 ) => {

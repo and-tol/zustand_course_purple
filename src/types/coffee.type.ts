@@ -4,6 +4,12 @@ export enum CoffeeCategoryEnum {
 	macchiato = 'macchiato',
 	americano = 'americano',
 }
+
+export enum CoffeeSizeEnum { 
+	M = 'M',
+	L= 'L',
+}
+
 export type CoffeeType = {
 	id: number;
 	name: string;
@@ -14,21 +20,21 @@ export type CoffeeType = {
 	rating: number;
 };
 
-export type getCoffeeListReqParams = {
+export type CoffeeQueryParams = {
 	text?: string;
 	type?: CoffeeCategoryEnum;
 };
 
-export type OrderItem = {
+export type CoffeItem = {
 	id: number;
 	name: string;
-	size: 'L';
 	quantity: number;
+	size: CoffeeSizeEnum.L;
 };
 
 export type OrderCoffeeReq = {
 	address: string;
-	orderItems: OrderItem[];
+	orderItems: CoffeItem[];
 };
 
 export type OrderCoffeeRes = {

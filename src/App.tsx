@@ -1,10 +1,11 @@
-import { useCoffeeStore } from './model/coffeeStore';
 import './App.css';
-import { useURLStorage } from './helpers/useURLStorage';
-import Cart from './components/Cart';
-import SearchInput from './components/SearchInput';
 import { CardList } from './components/CardList';
+import Cart from './components/Cart';
 import { CategoryPicker } from './components/CategoryPicker';
+import SearchInput from './components/SearchInput';
+import { useURLParamsStore } from './helpers/useURLParamsStore';
+import { useCoffeeStore } from './model/coffeeStore';
+
 
 function App() {
 	const { params, setParams } = useCoffeeStore();
@@ -16,7 +17,7 @@ function App() {
 	// 	setText(text);
 	// };
 
-	useURLStorage(params, setParams);
+	useURLParamsStore(params, setParams);
 
 	return (
 		<div className="wrapper">

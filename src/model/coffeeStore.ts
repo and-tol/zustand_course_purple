@@ -1,16 +1,15 @@
 // import axios from 'axios';
-import { create /*StateCreator*/ } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import {create /*StateCreator*/} from 'zustand';
+import {devtools, persist} from 'zustand/middleware';
+import {immer} from 'zustand/middleware/immer';
 import {
-	CoffeeType,
 	// CoffeeType,
-	getCoffeeListReqParams,
-	// OrderCoffeeRes,
-	// OrderItem,
+	CoffeeQueryParams,
+	CoffeeType,
 } from '../types/coffee.type';
-import { CartActions, CartState, ListActions, ListState } from '../types/store.type';
-import { listSlice } from './listSlice';
-import { cartSlice } from './cartSlice';
+import {CartActions, CoffeeCartState, CoffeeListActions, ListState} from '../types/store.type';
+import {cartSlice} from './cartSlice';
+import {listSlice} from './listSlice';
 // import {BASE_URL} from '../api/coreApi';
 
 // type CoffeeState = {
@@ -112,25 +111,28 @@ import { cartSlice } from './cartSlice';
 // 	)
 // );
 
-export const useCoffeeStore = create<CartActions & CartState & ListActions & ListState>()(
+export const useCoffeeStore = create<CartActions & CoffeeCartState & CoffeeListActions & ListState>()(
 	devtools(
-		persist((...arg) => ({ ...listSlice(...arg), ...cartSlice(...arg) }), {
-			name: 'coffeeStore',
-			partialize: (state) => ({
-				cart: state.cart,
-				address: state.address,
-			}),
-		}),
+		persist(
+			immer((...arg) => ({ ...listSlice(...arg), ...cartSlice(...arg) })),
+			{
+				name: 'coffeeStore',
+				partialize: (state) => ({
+					cart: state.cart,
+					address: state.address,
+				}),
+			}
+		),
 		{
 			name: 'coffeeStore',
 		}
 	)
 );
 
-export const getCoffeeList = (params?: getCoffeeListReqParams) =>
+export const getCoffeeList = (params?: CoffeeQueryParams) =>
 	useCoffeeStore.getState().getCoffeeList(params);
 
-export const setParams = (params?: getCoffeeListReqParams) =>
+export const setParams = (params?: CoffeeQueryParams) =>
 	useCoffeeStore.getState().setParams(params);
 
 export const setAddress = (address: string) => useCoffeeStore.getState().setAddress(address);
@@ -140,3 +142,5 @@ export const orderCoffee = () => useCoffeeStore.getState().orderCoffee();
 export const clearCart = () => useCoffeeStore.getState().clearCart();
 
 export const addToCart = (item: CoffeeType) => useCoffeeStore.getState().addToCart(item);
+
+export const setData = (data?: CoffeeType[]) => useCoffeeStore.setState({ coffeeList: data });

@@ -11,7 +11,7 @@ function Cart() {
 			{cart && cart.length > 0 ? (
 				<>
 					{cart.map((item, index) => (
-						<span key={index}>{item.name}</span>
+						<span key={index}>{`${item.name} - ${item.quantity}`}</span>
 					))}
 					<Input
 						placeholder="address"

@@ -1,28 +1,54 @@
-import { StateCreator } from 'zustand';
-import { CartActions, CartState, ListActions, ListState } from '../types/store.type';
 import axios from 'axios';
+import { produce } from 'immer';
+import { StateCreator } from 'zustand';
 import { BASE_URL } from '../api/coreApi';
-import { OrderCoffeeRes, OrderItem } from '../types/coffee.type';
+import { CoffeeSizeEnum, CoffeItem, OrderCoffeeRes } from '../types/coffee.type';
+import { CartActions, CoffeeCartState, CoffeeListActions, ListState } from '../types/store.type';
 
 export const cartSlice: StateCreator<
-	CartActions & CartState & ListActions & ListState,
+	CartActions & CoffeeCartState & CoffeeListActions & ListState,
 	[['zustand/devtools', never], ['zustand/persist', unknown]],
 	[['zustand/devtools', never], ['zustand/persist', unknown]],
-	CartActions & CartState
+	CartActions & CoffeeCartState
 > = (set, get) => ({
 	cart: undefined,
 	address: undefined,
-	addToCart: (item) => {
-		const { cart } = get();
-		const { id, name, subTitle } = item;
-		const preparedItem: OrderItem = {
-			id,
-			name: `${name} ${subTitle}`,
-			size: 'L',
-			quantity: 1,
-		};
-		set({ cart: cart ? [...cart, preparedItem] : [preparedItem] });
+
+	clearCart: () => {
+		set({ cart: undefined });
 	},
+
+	setAddress: (address) => {
+		set({ address });
+	},
+
+	addToCart(item) {
+		// const {cart} = get();
+		const { id, name, subTitle } = item;
+
+		const preparedItem: CoffeItem = {
+			id: item.id,
+			name: `${item.name} ${subTitle}`,
+			quantity: 1,
+			size: CoffeeSizeEnum.L,
+		};
+
+		set(
+			produce<CoffeeCartState>((draft) => {
+				if (!draft.cart) draft.cart = [];
+				
+				const itemIndex = draft.cart.findIndex((item) => item.id === preparedItem.id);
+
+				if (itemIndex !== -1) {
+					draft.cart[itemIndex].quantity += 1;
+					return;
+				}
+				
+				draft.cart.push(preparedItem);
+			})
+		);
+	},
+
 	orderCoffee: async () => {
 		const { cart, address, clearCart } = get();
 		try {
@@ -37,11 +63,5 @@ export const cartSlice: StateCreator<
 		} catch (error) {
 			console.error(error);
 		}
-	},
-	clearCart: () => {
-		set({ cart: undefined });
-	},
-	setAddress: (address) => {
-		set({ address });
 	},
 });

@@ -1,14 +1,18 @@
 import { Input } from 'antd';
-import { getCoffeeList, setParams, useCoffeeStore } from '../model/coffeeStore';
+import { setParams, useCoffeeStore } from '../model/coffeeStore';
 import { useShallow } from 'zustand/react/shallow';
-import {useEffect} from 'react';
+import { useCustomQuery } from '../helpers/useCustomQuery';
+import { useURLParamsStore } from '../helpers/useURLParamsStore';
 
 function SearchInput() {
 	const [params] = useCoffeeStore(useShallow((state) => [state.params]));
+	useURLParamsStore(params, setParams);
 
-	useEffect(() => {
-		getCoffeeList(params);
-	}, []);
+	useCustomQuery(params);
+
+	// useEffect(() => {
+	// 	getCoffeeList(params);
+	// }, []);
 
 	return (
 		<Input
